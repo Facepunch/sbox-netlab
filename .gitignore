@@ -1,0 +1,9 @@
+
+code/Properties
+code/obj
+.intermediate
+tools_asset_info.bin
+*.csproj
+launchSettings.json
+_bakeresourcecache
+tools_thumbnail_cache.bin
