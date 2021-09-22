@@ -17,6 +17,9 @@ namespace Lab
 			new HudEntity();
 		}
 
+		[ConVar.ClientData( "spectator_only" )]
+		public bool SpectatorOnly { get; set; } = false;
+
 		/// <summary>
 		/// Client joined, create them a LabPawn and spawn them
 		/// </summary>
@@ -24,7 +27,8 @@ namespace Lab
 		{
 			base.ClientJoined( client );
 
-			client.Pawn = new LabPawn();
+			client.Pawn = new LabPawn( client );
+
 			MoveToSpawnpoint( client.Pawn );
 		}
 	}

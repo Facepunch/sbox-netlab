@@ -6,6 +6,20 @@ namespace Lab
 {
 	public partial class BasePlayerPawn : Sandbox.AnimEntity
 	{
+		/// <summary>
+		/// The clothing container is what dresses the citizen
+		/// </summary>
+		public Clothing.Container Clothing = new();
+
+		public BasePlayerPawn( Client cl )
+		{
+			Clothing.LoadFromClient( cl );
+		}
+
+		public BasePlayerPawn()
+		{
+		}
+
 		public override void Spawn()
 		{
 			base.Spawn();
@@ -17,21 +31,9 @@ namespace Lab
 
 			Camera = new FirstPersonCamera();
 
-			AddClothes( "models/citizen_clothes/hair/hair_looseblonde/hair_looseblonde.vmdl" );
-			AddClothes( "models/citizen_clothes/jacket/suitjacket/suitjacket.vmdl" );
-			AddClothes( "models/citizen_clothes/trousers/smarttrousers/smarttrousers.vmdl" );
-			AddClothes( "models/citizen_clothes/shoes/smartshoes/smartshoes.vmdl" );
+			Clothing.DressEntity( this );
 
-			SetBodyGroup( "Feet", 1 );
-			SetBodyGroup( "Legs", 1 );
-			SetBodyGroup( "Chest", 1 );
-		}
-
-		void AddClothes( string modelName )
-		{
-			var cl = new ModelEntity( modelName, this );
-			cl.EnableHideInFirstPerson = true;
-			cl.EnableShadowInFirstPerson = true;
+			EnableHitboxes = true;
 		}
 
 		public override void Simulate( Client cl )
@@ -56,7 +58,7 @@ namespace Lab
 
 			var maxSpeed = 150;
 			if ( Input.Down( InputButton.Run ) ) maxSpeed = 200;
-			if ( Input.Down( InputButton.Duck ) ) maxSpeed = 50;
+			if ( Input.Down( InputButton.Duck ) ) maxSpeed = 70;
 
 			var moveDir = (Input.Rotation * new Vector3( Input.Forward, Input.Left, Input.Up )).WithZ( 0 ).Normal;
 			var wishDir = moveDir;

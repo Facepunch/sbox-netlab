@@ -7,53 +7,127 @@ using System.Linq;
 
 namespace Lab
 {
+
+	public struct DataStruct
+	{
+		public int a;
+		public int b;
+		public int c;
+
+		public DataStruct( int seed )
+		{
+			a = seed;
+			b = seed + 1;
+			c = seed + 2;
+		}
+
+		public override string ToString()
+		{
+			return $"{a}-{b}-{c}";
+		}
+	}
+
+	public partial class DataClass : NetworkComponent
+	{
+		[Net] public string DataString { get; set; }
+		[Net] public BasePlayerController Controller { get; set; }
+	}
+
 	public partial class LabPawn : BasePlayerPawn
 	{
+
+		[Net] public string DataString { get; set; }
+		[Net, Predicted] public int DataInt { get; set; }
+		[Net] public float? DataFloat { get; set; }
+		[Net] public Vector3 Vector3 { get; set; }
+		[Net] public DataStruct DataStruct { get; set; }
+		[Net] public List<int> IntList { get; set; }
+		[Net] public List<string> StringList { get; set; }
+		[Net] public Entity DataEntity { get; set; }
+		[Net] public DataClass DataClass { get; set; }
+
+		[Net] public BasePlayerController PlayerController { get; set; }
+
+
+		public LabPawn() 
+		{
+
+		}
+
+		public LabPawn( Client cl ) : base ( cl )
+		{
+			
+		}
+
+		RealTimeSince timeSinceUpdate;
+
 		public override void Simulate( Client cl )
 		{
 			base.Simulate( cl );
 
-			//
-			// Local client should get only one RPC - will supress the server version
-			// Other clients will also get one RPC straight from the server.
-			//
-			if ( Input.Pressed( InputButton.Slot1 ) )
-				ParameterlessRpc();
+			int line = Host.IsServer ? 2 : 30;
+			DebugOverlay.ScreenText( line, $"" +
+				$"DataString:    {DataString}\n" +
+				$"DataInt:       {DataInt}\n" +
+				$"DataFloat:     {DataFloat} ({DataFloat.HasValue})\n" +
+				$"Vector3:       {Vector3}\n" +
+				$"DataStruct:    {DataStruct}\n" +
+				$"DataEntity:    {DataEntity}\n" +
+				$"IntList:       {string.Join( $", ", IntList?.Select( x => x.ToString()))}\n" +
+				$"StringList:    {string.Join( $", ", StringList?.Select( x => x.ToString()))}\n" +
+				$"PlController:  {PlayerController}\n" +
+				$"DataClass:     {DataClass}\n" +
+				$"      DataString:      {DataClass?.DataString}\n" +
+				$"      Controller:      {DataClass?.Controller}\n" +
+				$"", 0.05f );
 
-			//
-			// Everyone should get one RPC. The local client should see that
-			// they never ran this rpc during their tick, so will not supress it.
-			//
-			if ( Input.Pressed( InputButton.Slot2 ) && IsServer )
-				ParameterlessRpc();
+			DataInt = Time.Tick;
 
-			//
-			// The local client should call the RPC during prediction then when
-			// they get the RPC from the server they'll see that the parameters are
-			// different and run the RPC again, assuming that the difference was on 
-			// purpose.
-			// Other clients will just get the server version
-			//
-			if ( Input.Pressed( InputButton.Slot3 ) )
-				ParameterRpc( Host.Name );
+			if ( Host.IsServer )
+			{
+				DataString = DateTime.Now.ToLongTimeString();
+				DataFloat = DateTime.Now.Second / 60.0f;
 
-			//
-			// Should be the same as slot1
-			//
-			if ( Input.Pressed( InputButton.Slot4 ) )
-				ParameterRpc( "Nice" );
-		}
+				if ( DateTime.Now.Second > 30 )
+					DataFloat = null;
 
-		[ClientRpc]
-		public void ParameterlessRpc()
-		{
-			DebugOverlay.Text( EyePos + Vector3.Random * 20.0f, "RPC CALLED!", 5.0f );
-		}
+				Vector3 = Transform.Position;
 
-		[ClientRpc]
-		public void ParameterRpc( string text )
-		{
-			DebugOverlay.Text( EyePos + Vector3.Random * 20.0f, $"RPC: {text}", 5.0f );
+				if ( timeSinceUpdate > 0.5f )
+				{
+					timeSinceUpdate = 0;
+
+					DataEntity = Entity.All.Skip( Rand.Int( 0, Entity.All.Count() - 1 ) ).FirstOrDefault();
+					DataStruct = new DataStruct( DateTime.Now.Second );
+
+					IntList.Add( Rand.Int( 0, 100 ) );
+					if ( IntList.Count > 10 )
+						IntList.RemoveAt( 0 );
+
+
+					StringList.Add( Guid.NewGuid().ToString().Substring( 0, 6 ) );
+					if ( StringList.Count > 10 )
+						StringList.RemoveAt( 0 );
+
+					if ( PlayerController is NoclipController )
+						PlayerController = new FlyingController();
+					else
+						PlayerController = new NoclipController();
+
+					if( DataClass  == null )
+					{
+						DataClass = new DataClass();
+						DataClass.DataString = Guid.NewGuid().ToString();
+						DataClass.Controller = new NoclipController();
+					}
+					else
+					{
+						DataClass = null;
+					}
+				}
+
+			}
+
 		}
 	}
 
