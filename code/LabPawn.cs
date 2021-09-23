@@ -27,6 +27,23 @@ namespace Lab
 		}
 	}
 
+	public partial class ComponentRed : EntityComponent
+	{
+		[Net] public int DataInt { get; set; }
+		[Net] public string DataString { get; set; }
+		[Net] public DataClass DataClass { get; set; }
+	}	
+	
+	public partial class ComponentGreen : EntityComponent
+	{
+
+	}	
+
+	public partial class ComponentBlue : EntityComponent
+	{
+
+	}
+
 	public partial class DataClass : NetworkComponent
 	{
 		[Net] public string DataString { get; set; }
@@ -44,6 +61,7 @@ namespace Lab
 		[Net] public List<int> IntList { get; set; }
 		[Net] public List<string> StringList { get; set; }
 		[Net] public Entity DataEntity { get; set; }
+		[Net] public LabPawn Pawn { get; set; }
 		[Net] public DataClass DataClass { get; set; }
 
 		[Net] public BasePlayerController PlayerController { get; set; }
@@ -56,7 +74,8 @@ namespace Lab
 
 		public LabPawn( Client cl ) : base ( cl )
 		{
-			
+			Components.GetOrCreate<ComponentRed>();
+			Components.GetOrCreate<ComponentGreen>();
 		}
 
 		RealTimeSince timeSinceUpdate;
@@ -65,8 +84,17 @@ namespace Lab
 		{
 			base.Simulate( cl );
 
-			int line = Host.IsServer ? 2 : 30;
-			DebugOverlay.ScreenText( line, $"" +
+			var componentText = "";
+
+			foreach( var component in Components.GetAll<EntityComponent>() )
+			{
+				if ( componentText != "" ) componentText += ", ";
+				
+				componentText += $"{component}";
+			}
+
+			var position = Host.IsServer ? new Vector2( 100, 100 ) : new Vector2( 100, 400 );
+			DebugOverlay.ScreenText( position, 0, Color.White, $"" +
 				$"DataString:    {DataString}\n" +
 				$"DataInt:       {DataInt}\n" +
 				$"DataFloat:     {DataFloat} ({DataFloat.HasValue})\n" +
@@ -79,6 +107,11 @@ namespace Lab
 				$"DataClass:     {DataClass}\n" +
 				$"      DataString:      {DataClass?.DataString}\n" +
 				$"      Controller:      {DataClass?.Controller}\n" +
+				$"Components:      {componentText}\n" +
+				$"ComponentRed:      {Components.Get<ComponentRed>()}\n" +
+				$"      DataInt:      {Components.Get<ComponentRed>().DataInt}\n" +
+			//	$"      DataString:     {Components.Get<ComponentRed>().DataString}\n" +
+				$"      DataClass:		 {Components.Get<ComponentRed>().DataClass}\n" +
 				$"", 0.05f );
 
 			DataInt = Time.Tick;
@@ -88,16 +121,18 @@ namespace Lab
 				DataString = DateTime.Now.ToLongTimeString();
 				DataFloat = DateTime.Now.Second / 60.0f;
 
-				if ( DateTime.Now.Second > 30 )
+				if ( DateTime.Now.Second % 2 == 1 )
 					DataFloat = null;
 
 				Vector3 = Transform.Position;
+				DataEntity = Entity.All.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
 
 				if ( timeSinceUpdate > 0.5f )
 				{
 					timeSinceUpdate = 0;
 
-					DataEntity = Entity.All.Skip( Rand.Int( 0, Entity.All.Count() - 1 ) ).FirstOrDefault();
+					Components.Get<ComponentRed>().DataInt = Rand.Int( 10000, 99999 );
+
 					DataStruct = new DataStruct( DateTime.Now.Second );
 
 					IntList.Add( Rand.Int( 0, 100 ) );
@@ -123,6 +158,16 @@ namespace Lab
 					else
 					{
 						DataClass = null;
+					}
+
+					var c = Components.Get<ComponentBlue>();
+					if ( c == null )
+					{
+						Components.Create<ComponentBlue>();
+					}
+					else
+					{
+						Components.Remove( c );
 					}
 				}
 
