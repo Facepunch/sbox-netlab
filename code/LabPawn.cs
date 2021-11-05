@@ -59,7 +59,11 @@ namespace Lab
 		[Net] public Vector3 Vector3 { get; set; }
 		[Net] public DataStruct DataStruct { get; set; }
 		[Net] public List<int> IntList { get; set; }
-		[Net] public List<string> StringList { get; set; }
+		[Net] public IList<string> StringList { get; set; }
+		[Net] public IDictionary<int, int> IntIntDict { get; set; }
+		[Net] public IDictionary<int, string> IntStringDict { get; set; }
+		[Net] public IDictionary<string, int> StringIntDict { get; set; }
+		[Net] public IDictionary<string, Entity> StringEntityDict { get; set; }
 		[Net] public Entity DataEntity { get; set; }
 		[Net] public LabPawn Pawn { get; set; }
 		[Net] public DataClass DataClass { get; set; }
@@ -103,6 +107,10 @@ namespace Lab
 				$"DataEntity:    {DataEntity}\n" +
 				$"IntList:       {string.Join( $", ", IntList?.Select( x => x.ToString()))}\n" +
 				$"StringList:    {string.Join( $", ", StringList?.Select( x => x.ToString()))}\n" +
+				$"IntIntDict:    {string.Join( $", ", IntIntDict?.Select( x => x.ToString()))}\n" +
+				$"IntStringDict: {string.Join( $", ", IntStringDict?.Select( x => x.ToString()))}\n" +
+				$"StringIntDict: {string.Join( $", ", StringIntDict?.Select( x => x.ToString()))}\n" +
+				$"StringEntityDict: {string.Join( $", ", StringEntityDict?.Select( x => x.ToString()))}\n" +
 				$"PlController:  {PlayerController}\n" +
 				$"DataClass:     {DataClass}\n" +
 				$"      DataString:      {DataClass?.DataString}\n" +
@@ -143,6 +151,22 @@ namespace Lab
 					StringList.Add( Guid.NewGuid().ToString().Substring( 0, 6 ) );
 					if ( StringList.Count > 10 )
 						StringList.RemoveAt( 0 );
+
+					IntIntDict.Clear();
+					for ( int i = 0; i < 5; i++ )
+						IntIntDict[Rand.Int(0, 100)] = Rand.Int( 0, 100 );
+
+					IntStringDict.Clear();
+					for ( int i = 0; i < 5; i++ )
+						IntStringDict[Rand.Int( 0, 100 )] = Guid.NewGuid().ToString().Substring( 0, 6 );
+
+					StringIntDict.Clear();
+					for ( int i = 0; i < 5; i++ )
+						StringIntDict[Guid.NewGuid().ToString().Substring( 0, 6 )] = Rand.Int( 0, 100 );
+
+					StringEntityDict.Clear();
+					for ( int i = 0; i < 5; i++ )
+						StringEntityDict[Guid.NewGuid().ToString().Substring( 0, 6 )] = Entity.All.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
 
 					if ( PlayerController is NoclipController )
 						PlayerController = new FlyingController();
