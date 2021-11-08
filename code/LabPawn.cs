@@ -44,7 +44,7 @@ namespace Lab
 
 	}
 
-	public partial class DataClass : NetworkComponent
+	public partial class DataClass : BaseNetworkable
 	{
 		[Net] public string DataString { get; set; }
 		[Net] public BasePlayerController Controller { get; set; }
@@ -58,7 +58,7 @@ namespace Lab
 		[Net] public float? DataFloat { get; set; }
 		[Net] public Vector3 Vector3 { get; set; }
 		[Net] public DataStruct DataStruct { get; set; }
-		[Net] public List<int> IntList { get; set; }
+		[Net] public IList<int> IntList { get; set; }
 		[Net] public IList<string> StringList { get; set; }
 		[Net] public IDictionary<int, int> IntIntDict { get; set; }
 		[Net] public IDictionary<int, string> IntStringDict { get; set; }
