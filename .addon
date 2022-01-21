@@ -1,4 +1,13 @@
 {
-	"sharedassets": "*.*",
-	"ident": "facepunch.netlab"
+  "SharedAssets": "*.*",
+  "Title": "Net Lab",
+  "Type": "game",
+  "Org": "local",
+  "Ident": "netlab",
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "HasCode": true,
+  "CodePath": "code",
+  "RootNamespace": "Lab"
 }
