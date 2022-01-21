@@ -64,6 +64,8 @@ namespace Lab
 		[Net] public IDictionary<int, string> IntStringDict { get; set; }
 		[Net] public IDictionary<string, int> StringIntDict { get; set; }
 		[Net] public IDictionary<string, Entity> StringEntityDict { get; set; }
+		[Net] public IDictionary<string, DataClass> StringDataClassDict { get; set; }
+		[Net] public IDictionary<string, object> StringObjectDict { get; set; }
 		[Net] public Entity DataEntity { get; set; }
 		[Net] public LabPawn Pawn { get; set; }
 		[Net] public DataClass DataClass { get; set; }
@@ -97,29 +99,31 @@ namespace Lab
 				componentText += $"{component}";
 			}
 
-			var position = Host.IsServer ? new Vector2( 100, 100 ) : new Vector2( 100, 400 );
+			var position = Host.IsServer ? new Vector2( 100, 100 ) : new Vector2( 100, 500 );
 			DebugOverlay.ScreenText( position, 0, Color.White, $"" +
-				$"DataString:    {DataString}\n" +
-				$"DataInt:       {DataInt}\n" +
-				$"DataFloat:     {DataFloat} ({DataFloat.HasValue})\n" +
-				$"Vector3:       {Vector3}\n" +
-				$"DataStruct:    {DataStruct}\n" +
-				$"DataEntity:    {DataEntity}\n" +
-				$"IntList:       {string.Join( $", ", IntList?.Select( x => x.ToString()))}\n" +
-				$"StringList:    {string.Join( $", ", StringList?.Select( x => x.ToString()))}\n" +
-				$"IntIntDict:    {string.Join( $", ", IntIntDict?.Select( x => x.ToString()))}\n" +
-				$"IntStringDict: {string.Join( $", ", IntStringDict?.Select( x => x.ToString()))}\n" +
-				$"StringIntDict: {string.Join( $", ", StringIntDict?.Select( x => x.ToString()))}\n" +
-				$"StringEntityDict: {string.Join( $", ", StringEntityDict?.Select( x => x.ToString()))}\n" +
-				$"PlController:  {PlayerController}\n" +
-				$"DataClass:     {DataClass}\n" +
-				$"      DataString:      {DataClass?.DataString}\n" +
-				$"      Controller:      {DataClass?.Controller}\n" +
-				$"Components:      {componentText}\n" +
-				$"ComponentRed:      {Components.Get<ComponentRed>()}\n" +
-				$"      DataInt:      {Components.Get<ComponentRed>().DataInt}\n" +
-			//	$"      DataString:     {Components.Get<ComponentRed>().DataString}\n" +
-				$"      DataClass:		 {Components.Get<ComponentRed>().DataClass}\n" +
+				$"DataString:          {DataString}\n" +
+				$"DataInt:             {DataInt}\n" +
+				$"DataFloat:           {DataFloat} ({DataFloat.HasValue})\n" +
+				$"Vector3:             {Vector3}\n" +
+				$"DataStruct:          {DataStruct}\n" +
+				$"DataEntity:          {DataEntity}\n" +
+				$"IntList:             {string.Join( $", ", IntList?.Select( x => x.ToString()))}\n" +
+				$"StringList:          {string.Join( $", ", StringList?.Select( x => x.ToString()))}\n" +
+				$"IntIntDict:          {string.Join( $", ", IntIntDict?.Select( x => x.ToString()))}\n" +
+				$"IntStringDict:       {string.Join( $", ", IntStringDict?.Select( x => x.ToString()))}\n" +
+				$"StringIntDict:       {string.Join( $", ", StringIntDict?.Select( x => x.ToString()))}\n" +
+				$"StringEntityDict:    {string.Join( $", ", StringEntityDict?.Select( x => x.ToString()))}\n" +
+				$"StringDataClassDict: {string.Join( $", ", StringDataClassDict?.Select( x => x.ToString()))}\n" +
+				$"StringObjectDict:    {string.Join( $", ", StringObjectDict?.Select( x => x.ToString()))}\n" +
+				$"PlController:        {PlayerController}\n" +
+				$"DataClass:           {DataClass}\n" +
+				$"      DataString:    {DataClass?.DataString}\n" +
+				$"      Controller:    {DataClass?.Controller}\n" +
+				$"Components:          {componentText}\n" +
+				$"ComponentRed:        {Components.Get<ComponentRed>()}\n" +
+				$"      DataInt:       {Components.Get<ComponentRed>().DataInt}\n" +
+			//	$"      DataString:    {Components.Get<ComponentRed>().DataString}\n" +
+				$"      DataClass:     {Components.Get<ComponentRed>().DataClass}\n" +
 				$"", 0.05f );
 
 			DataInt = Time.Tick;
@@ -167,6 +171,41 @@ namespace Lab
 					StringEntityDict.Clear();
 					for ( int i = 0; i < 5; i++ )
 						StringEntityDict[Guid.NewGuid().ToString().Substring( 0, 6 )] = Entity.All.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
+
+					StringDataClassDict.Clear();
+					for ( int i = 0; i < 5; i++ )
+						StringDataClassDict[Guid.NewGuid().ToString().Substring( 0, 6 )] = new DataClass() { DataString = Guid.NewGuid().ToString().Substring( 0, 6 ) };
+
+					StringObjectDict.Clear();
+					for ( int i = 0; i < 5; i++ )
+					{
+						object obj = 42;
+
+						switch ( Rand.Int( 0, 5 ) )
+						{
+							case 0:
+								obj = Guid.NewGuid().ToString().Substring( 0, 6 );
+								break;
+							case 1:
+								obj = Rand.Int( 0, 100 );
+								break;
+							case 2:
+								obj = Rand.Float( 0, 100 );
+								break;
+							case 3:
+								obj = Vector3.Random;
+								break;
+							case 4:
+								obj = true;
+								break;
+							case 5:
+								obj = Entity.All.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
+								break;
+						}
+
+						StringObjectDict[Guid.NewGuid().ToString().Substring( 0, 6 )] = obj;
+
+					}
 
 					if ( PlayerController is NoclipController )
 						PlayerController = new FlyingController();
